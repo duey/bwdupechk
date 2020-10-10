@@ -4,10 +4,14 @@
 # will have to be updated whenever you unlock Bitwarden CLI
 #export BW_SESSION=""
 
+echo
+echo -n "FYI, the date stamp of bw's last sync was:" $(date -d `bw sync --last`) "(converted to your time zone)"
+echo
+
 # the commands are a bit slow to show anything, so, just making some output to let the 
 # user know something is happening
 echo
-echo "Searching ..."
+echo "Searching for duplicate passwords ..."
 
 # initialize variables to compare previous password and ID
 prevPass=""
