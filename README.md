@@ -41,3 +41,6 @@ _bwdupechk_ uses _bw_ to iterate through the entries of your Bitwarden password 
 <br />
 
 At this point, it will prompt you with a choice of deleting one of them, or not deleting anything and continuing on.  The delete command I use does NOT use the _"--permanent"_ option, so it should just move the item to the Bitwarden Trash folder in your vault.  I do not know if there is a Bitwarden setting that will make _"bw delete"_ by itself irrevocable, so, that's why I suggest that you backup your vault before using this script.
+<br />
+<br />
+**NOTE**: I believe you have to manually sync when using the Bitward CLI software.  What I mean is that, after _bw_ logs in, it'll have a local copy of your vault, and any changes made would be to that local copy.  To actually get it to transfer your changes to the Bitwarden online vault, just run _bw sync_
