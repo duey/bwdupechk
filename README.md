@@ -9,21 +9,24 @@ A script to check for password duplicates in your Bitwarden password vault.  Wri
 # Software Requirements:
 (I'm unsure what minimum versions would be required, I have provided what I'm using for reference)
 
-1) bash 
-   - Linux shell, and script interpreter
-   - I'm using version 5.0.17(1)-release (that comes with Ubuntu 20.04)
-2) bw
-   - Bitwarden CLI (Command-line interface)
-   - I'm using version 1.12.1, from the Ubuntu Snap store, but this is also available on Bitwarden's website
-3) jq 
-   - a lightweight and flexible command-line JSON processor
-   - I'm using version jq-1.6, from Ubuntu apt repository 
-4) pr 
-   - GNU tool to "paginate or columnate files for printing"
-   - I'm using version pr (GNU coreutils) 8.30
-5) diff
-   - GNU tool to compare files line by line
-   - I'm using version diff (GNU diffutils) 3.7
+> bash 
+  - Linux shell, and script interpreter
+  - I'm using version 5.0.17(1)-release (that comes with Ubuntu 20.04)
+> bw
+  - Bitwarden CLI (Command-line interface)
+  - I'm using version 1.12.1, from the Ubuntu Snap store, but this is also available on Bitwarden's website
+> jq 
+  - a lightweight and flexible command-line JSON processor
+  - I'm using version jq-1.6, from Ubuntu apt repository 
+> pr 
+  - GNU tool to "paginate or columnate files for printing"
+  - I'm using version pr (GNU coreutils) 8.30
+> tput
+  - to query terminfo database (for column width)
+  - I'm using version ncurses 6.2.20200212
+> diff
+  - GNU tool to compare files line by line
+  - I'm using version diff (GNU diffutils) 3.7
     
 My script requires that you have have already logged into your Bitwarden account via the bw CLI, and that it is unlocked.  It assumes that the BW_SESSION environment variable is set (either in the shell where the script is executed, or in the source of the script).  Basically, if you can run "bw status --pretty" and it shows "status": "unlocked", you're good to go.
 
