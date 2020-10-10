@@ -31,8 +31,9 @@ A script to check for password duplicates in your Bitwarden password vault.  Wri
   - GNU tool to compare files line by line
   - I'm using version diff (GNU diffutils) 3.7
   
-  
-  
+<br />
+<br />
+
 My script requires that you have have already logged into your Bitwarden account via the _bw_ CLI, and that it is unlocked.  It assumes that the _BW_SESSION_ environment variable is set (either in the shell where the script is executed, or in the source of the script).  Basically, if you can run _"bw status --pretty"_ and it shows _"status": "unlocked"_, you're good to go.
 <br />
 <br />
