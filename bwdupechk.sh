@@ -44,9 +44,11 @@ echo "> status:" $bwstatus
 
 lastsync=$(echo $bwstatusoutput | jq -r '.lastSync')
 
-echo "Last sync:" `date -d "$lastsync"`
+echo
+echo "Last sync:" `date -d "$lastsync"` "(converted to your time zone)"
 echo "(if this is significantly in the past, please quit and run \"bw sync\")"
 
+echo
 read -p "Press Enter to continue (or press Ctrl-C to exit)"
 
 # the commands are a bit slow to show anything, so, just making some output to let the
