@@ -1,14 +1,55 @@
 #!/bin/bash
 
 # if you have a Bitwarden session key, you can add it here
-# will have to be updated whenever you unlock Bitwarden CLI
+# (will have to be updated whenever you unlock Bitwarden CLI)
 #export BW_SESSION=""
 
-echo
-echo -n "FYI, the date stamp of bw's last sync was:" $(date -d `bw sync --last`) "(converted to your time zone)"
-echo
+echo "Welcome to bwdupechk!"
 
-# the commands are a bit slow to show anything, so, just making some output to let the 
+echo
+echo "Checking bw's status ..."
+
+# check if bw command is not working
+# 2>&1 to redirect stderr to stdout, to get all output in one
+# with --quiet, nothing will output if things are OK
+if [ "`bw status --quiet 2>&1`" != "" ]; then
+  echo "> bw status command failed, error is as follows:"
+  bw status --quiet
+  exit
+fi
+
+# the "bw status" has the ... well, status (locked or unlocked)
+# as well as the last synced time, which is important as bw
+# needs to be synced manually
+
+bwstatusoutput="$(bw status 2>/dev/null)"
+
+bwstatus=$(echo $bwstatusoutput | jq -r '.status')
+
+if [ "$bwstatus" != "unlocked" ]; then
+  echo "> bw status is not unlocked, cannot continue"
+  echo "Current bw status reported:" $bwstatus
+
+  echo -n "Please enter \"bw "
+  case "$bwstatus" in
+    "locked") echo -n "unlock\" " ;;
+    *) echo -n "login\" or \"bw unlock\" (as required) " ;;
+  esac
+
+  echo "and follow bw's instructions, then re-run bwduepchk"
+  exit
+fi
+
+echo "> status:" $bwstatus
+
+lastsync=$(echo $bwstatusoutput | jq -r '.lastSync')
+
+echo "Last sync:" `date -d "$lastsync"`
+echo "(if this is significantly in the past, please quit and run \"bw sync\")"
+
+read -p "Press Enter to continue (or press Ctrl-C to exit)"
+
+# the commands are a bit slow to show anything, so, just making some output to let the
 # user know something is happening
 echo
 echo "Searching for duplicate passwords ..."
@@ -19,21 +60,21 @@ prevID=""
 
 # setup for loop to iterate through unique ID's in the list
 # the jq line I got from searching online, most of it should be mostly self-explanatory
-#   - the "-r" provides "raw" output (ie. without quotes around the ID's) 
+#   - the "-r" provides "raw" output (ie. without quotes around the ID's)
 #   - the pipes/lines ( | ) is for jq itself to migrate the data through it's filters
 #   - I'm not sure what the middle .[] does, but, it makes it work somehow
 
 for itemID in \
 $(bw list items | jq -r 'sort_by( .login.password) | .[] | select( .login.password != null) | .id')
 do
-  
+
   # this is also just to show the user that something is happening
   echo "Item ID#" $itemID
 
   passwd=$(bw get password $itemID)
 
   if [ "$passwd" == "$prevPass" ]; then
-  
+
     # quite dramatic!
     echo
     echo "***** Found password match! ..."
