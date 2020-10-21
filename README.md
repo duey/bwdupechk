@@ -22,7 +22,7 @@ A script to check for password duplicates in your Bitwarden password vault.  Wri
   - a lightweight and flexible command-line JSON processor
   - I'm using version jq-1.6, from Ubuntu apt repository
 - _date_
-  - prints the date, used to convert _bw_'s to local time
+  - prints the date, used to convert _bw_'s date to local time
   - I'm using version date (GNU coreutils) 8.30
 - _pr_ 
   - GNU tool to "paginate or columnate files for printing"
@@ -46,4 +46,10 @@ _bwdupechk_ uses _bw_ to iterate through the entries of your Bitwarden password 
 At this point, it will prompt you with a choice of deleting one of them, or not deleting anything and continuing on.  The delete command I use does NOT use the _"--permanent"_ option, so it should just move the item to the Bitwarden Trash folder in your vault.  I do not know if there is a Bitwarden setting that will make _"bw delete"_ by itself irrevocable, so, that's why I suggest that you backup your vault before using this script.
 <br />
 <br />
-**NOTE**: I believe you have to manually sync when using the Bitward CLI software.  What I mean is that, after _bw_ logs in, it'll have a local copy of your vault, and any changes made would be to that local copy.  To actually get it to transfer your changes to the Bitwarden online vault, just run _"bw sync"_.  The script will now show _bw_'s last sync date-stamp at startup (converted to your timezone).
+**NOTE**: I believe you have to manually sync when using the Bitward CLI software.  What I mean is that, after _bw_ logs in, it'll have a local copy of your vault, and any changes made would be to that local copy.  To actually get it to transfer your changes to the Bitwarden online vault, just run _"bw sync"_.  The script will show _bw_'s last sync date-stamp at startup (converted to your timezone).
+<br />
+<br />
+<br />
+**New Features**:  
+    - checks status of _bw_ to make sure it's ready to go before getting list of ID's  
+    - added ability to pass the script a Bitwarden ID, and it will skip to that ID and start processing  
