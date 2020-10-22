@@ -53,11 +53,11 @@ echo "Last sync:" `date -d "$lastsync"` "(converted to your time zone)"
 echo "(if this is significantly in the past, please quit and run \"bw sync\")"
 
 # TODO:
-# add logic to check the amount of time that has passed and if it hasn't been 
+# add logic to check the amount of time that has passed and if it hasn't been
 # that long ago, skip the following prompt
 
 echo
-read -p "Press Enter to continue (or press Ctrl-C to exit)>"
+read -p "Press Enter to continue (or press Ctrl-C to exit) >"
 
 # initialize variables to compare previous password and ID in the following for loop
 prevPass=""
@@ -118,7 +118,7 @@ echo "Searching for duplicate passwords ..."
 
 for itemID in $BWitemlist ; do
   # this is also just to show the user that something is happening
-  echo "Item ID#" $itemID
+  echo "Item ID:" $itemID
 
   passwd=$(bw get password $itemID)
 
@@ -126,7 +126,13 @@ for itemID in $BWitemlist ; do
 
     # quite dramatic!
     echo
-    echo "***** Found password match! ..."
+    echo "***** Found password match!"
+    echo -n "Getting details of these items, please wait ..."
+
+    prevItemLines=$(bw get item $prevID --pretty)
+    currItemLines=$(bw get item $itemID --pretty)
+
+    echo
     echo
 
     # the following prints out the Bitwarden item details side by side, using pr
@@ -135,34 +141,33 @@ for itemID in $BWitemlist ; do
     # "-t" to omit pr's header
 
     pr -mt -W $(tput cols) \
-    <(echo "Left side entry (1)" && bw get item $prevID --pretty) \
-    <(echo "Right side entry (2)" && bw get item $itemID --pretty)
+    <(echo "Left side entry (1)" && echo "$prevItemLines") \
+    <(echo "Right side entry (2)" && echo "$currItemLines")
 
     echo
     echo "Differences:"
     echo
 
     diff --width=$(tput cols) --suppress-common-lines --side-by-side \
-    <(echo "Left side entry (1)" && bw get item $prevID --pretty) \
-    <(echo "Right side entry (2)" && bw get item $itemID --pretty)
-
+    <(echo "Left side entry (1)" && echo "$prevItemLines") \
+    <(echo "Right side entry (2)" && echo "$currItemLines")
 
     echo
-    read -p "Enter 1 or 2 to delete, enter nothing to skip, or press Ctrl-C to exit ... " input
+    read -p "Enter 1 or 2 to delete, enter nothing to skip, or press Ctrl-C to exit script >" input
 
     case "$input" in
       1)
-        echo "Deleting ID#" $prevID
+        echo "Deleting ID:" $prevID
         bw delete item $prevID
         passwd=""
         ;;
       2)
-        echo "Deleting ID#" $itemID
+        echo "Deleting ID:" $itemID
         bw delete item $itemID
         passwd=""
         ;;
       *)
-        echo ".... leaving things as-is" 
+        echo ".... leaving things as-is"
         ;;
     esac
 
