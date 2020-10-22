@@ -8,7 +8,7 @@
 echo "Welcome to bwdupechk!"
 
 echo
-echo -n "Checking bw's status ..."
+echo -n "Checking bw's status, please wait ..."
 
 # check if bw command is not working
 # 2>&1 to redirect stderr to stdout, to get all output in one
@@ -57,25 +57,27 @@ echo "(if this is significantly in the past, please quit and run \"bw sync\")"
 # that long ago, skip the following prompt
 
 echo
-read -p "Press Enter to continue (or press Ctrl-C to exit)"
+read -p "Press Enter to continue (or press Ctrl-C to exit)>"
 
 # initialize variables to compare previous password and ID in the following for loop
 prevPass=""
 prevID=""
 
-# I'm changing the BW ID list to a variable (instead of as a command at the top of the loop)
-# so I can program a way to skip through the list if specified on the command line
+# I've changed the BW ID list to a variable (instead of as a command at the top of the
+# loop) so I can program a way to skip through the list if specified on the command line
+
+echo
+echo -n "Getting list of ID's from bw CLI, please wait ..."
 
 # setup BWitemlist (the list for the loop) to iterate through unique Bitwarden ID's
+
+BWitemlist=$(bw list items | jq -r 'sort_by( .login.password) | .[] | select( .login.password != null) | .id')
+
 # the jq line I got from searching online, most of it should be mostly self-explanatory
 #  - the "-r" provides "raw" output (ie. without quotes around the ID's)
 #  - the pipes/lines ( | ) is for jq itself to migrate the data through it's filters
 #  - I'm not sure what the middle .[] does, but, it makes it work somehow
 
-echo
-echo -n "Getting list of ID's, please wait ..."
-
-BWitemlist=$(bw list items | jq -r 'sort_by( .login.password) | .[] | select( .login.password != null) | .id')
 
 # continue output on next line (after echo -n above)
 echo
@@ -85,22 +87,27 @@ if [ "$1" != "" ] ; then
   startID=${1//[^a-zA-Z0-9\-]/}
 
   # check if parameter provided is actually in the list of ID's
-  if [[ "$BWitemlist" != *"$startID"* ]] ; then
-    echo
-    echo "Provided ID ("$startID") not found, continuing from top of list..."
-  else
-    # cut out beginning of list until the provided ID
-    # Bash string manipulation, requires the curly brackets { }
-    # using the hash symbol ( # ), the following will cut from the beginning
-    # of the variable until the first occurance of the provided substring
+  # using bash regex search (indicated by the ~ after = in the following if statement)
+  # using this as it'll allow me to search for spaces around the provided ID (ie. a whole
+  # word, and not a part of an ID)
+  if [[ $BWitemlist =~ [[:space:]]$startID[[:space:]] ]] ; then
+    # now, cut out beginning of list until the provided ID...
 
     BWitemlist=${BWitemlist#*$startID*}
+    # Bash string manipulation, requires the curly brackets { }
+    # using the hash symbol ( # ), the string will be cut from the beginning
+    # of the variable until the first occurance of the provided substring
 
     # since the above removes the actual ID provided, add it back in
+    # I know that I can combine this and the above command, but, I like easier to
+    # understand code
     BWitemlist="$startID $BWitemlist"
 
     echo
     echo "Starting search at ID:" $startID
+  else
+    echo
+    echo "Provided ID ("$startID") not found, starting from top of list."
   fi
 fi
 
