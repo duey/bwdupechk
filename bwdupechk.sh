@@ -8,6 +8,11 @@
 
 echo "Welcome to bwdupechk!"
 
+
+# TODO:  check for required software
+# - bw
+# - jq
+
 echo
 echo -n "Checking bw's status, please wait ..."
 # in the above echo command, the -n prevents a new line from being printed
@@ -16,10 +21,12 @@ echo -n "Checking bw's status, please wait ..."
 # check if bw command is not working
 # 2>&1 to redirect stderr to stdout, to get all output in one
 # with --quiet, nothing will output if things are OK
-if [ "$(bw status --quiet 2>&1)" != "" ]; then
-  echo -e "\n> bw status command failed, error is as follows:"
+
+bwStatusOutput="$(bw status --quiet 2>&1)"
+
+if [ "$bwStatusOutput" != "" ]; then
+  echo -e "\n> bw status command failed, error is as follows:\n$bwStatusOutput"
   # in the above, the -e allows echo to interpret the \n as a new line char
-  bw status --quiet
   exit
 fi
 
@@ -32,12 +39,13 @@ bwStatusOutput="$(bw status 2>/dev/null)"
 bwStatus=$(echo "$bwStatusOutput" | jq -r '.status')
 
 if [ "$bwStatus" != "unlocked" ]; then
-  echo -e "\n> bw status is not unlocked, cannot continue"
+  echo -e "\n> bw status is not unlocked, cannot continue.\n"
   echo "Current bw status reported: $bwStatus"
 
   echo -n "Please enter \"bw "
   case "$bwStatus" in
     "locked") echo -n "unlock\" " ;;
+    "unauthenticated") echo -n "login\" " ;;
     *) echo -n "login\" or \"bw unlock\" (as required) " ;;
   esac
 
@@ -54,9 +62,9 @@ echo
 echo "Last sync: $(date -d "$lastsync") (converted to your time zone)"
 echo "(if this is significantly in the past, please quit and run \"bw sync\")"
 
-# TODO:
-# add logic to check the amount of time that has passed and if it hasn't been
-# that long ago, skip the following prompt
+# TODO:  add logic to check the amount of time that has passed and if it
+# hasn't been that long ago, skip the following prompt
+# - maybe also add an option for the user to initiate a bw sync
 
 echo
 read -rp "Press Enter to continue (or press Ctrl-C to exit) >"
@@ -127,22 +135,21 @@ for itemID in $BWitemlist ; do
 
   if [ "$passwd" == "$prevPass" ]; then
 
-#TODO: probably should add a test to see if the "username" is the same or not
+# TODO: probably should add a test to see if the "username" is the same or not
 # perhaps the website as well, but, that's a bit more complex
 # (could maybe check diff output for "uri"?
 
-    # quite dramatic!
     echo
-    echo "***** Found password match!"
-    echo -n "Getting details of these items, please wait .."
+    echo "***** Found password match!"    # quite dramatic!
+    echo -n "Getting details of these items, please wait ."
 
     prevItemLines=$(bw get item "$prevID" --pretty)
 
-    # just because I can, I'll output another couple of dots
-    echo -n ".."
+    # just because I can, I'll output another dot
+    echo -n "."
     currItemLines=$(bw get item "$itemID" --pretty)
 
-    echo
+    echo "."
     echo
 
     # $(tput cols) gets the current width of the terminal/screen and helps pr scale nicely
@@ -166,7 +173,16 @@ for itemID in $BWitemlist ; do
     <(echo "Right side entry (2)" && echo "$currItemLines")
 
     echo
-    read -rp "Enter 1 or 2 to delete, enter nothing to skip, or press Ctrl-C to exit script >" input
+    echo "Enter 1 or 2 to delete (the corresponding entry), enter nothing"
+    read -rp "to skip and continue on, or press Ctrl-C to exit script >" input
+
+# TODO: IDEA: maybe add a "merge" option
+# - would attempt to merge the two entries into one
+# - not sure if I'd have to create a whole new entry?
+
+# TODO: maybe also add a "q to quit" option
+# - that way I can ask the user if they want to sync their changes before exiting
+# - or, even put a "sync changes" option in the above prompt?
 
     case "$input" in
       1)
